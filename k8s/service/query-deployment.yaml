@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: queryapi
+spec:
+    selector:
+        matchLabels:
+            app: queryapi
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: queryapi
+        spec:
+            containers:
+                -   name: queryapi
+                    image: query:1.0
+                    imagePullPolicy: Never
+                    resources:
+                        requests:
+                            memory: "192Mi"
+                            cpu: "500m"
+                        limits:
+                            memory: "256Mi"
+                            cpu: "1000m"
+                    ports:
+                        -   containerPort: 8082
+                    env:
+                        -   name: server.port
+                            value: "8082"
+                        -   name: SPRING_DATASOURCE_URL
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: querydb-configmap
+                                    key: database_url
+                        -   name: SPRING_DATASOURCE_USERNAME
+                            value: root
+                        -   name: SPRING_DATASOURCE_PASSWORD
+                            valueFrom:
+                                secretKeyRef:
+                                    name: querydb-secret
+                                    key: mysql-user-password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: queryapi
+    labels:
+        app: queryapi
+spec:
+    ports:
+        -   protocol: TCP
+            port: 8082
+            targetPort: 8082
+    selector:
+        app: queryapi
+    type: ClusterIP

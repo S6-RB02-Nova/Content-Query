@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: querydb
+spec:
+    ports:
+        -   port: 3307
+    selector:
+        app: querydb
+    clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: querydb
+spec:
+    selector:
+        matchLabels:
+            app: querydb
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app: querydb
+        spec:
+            containers:
+                -   image: mysql:latest
+                    name: querydb
+                    env:
+                        -   name: MYSQL_USER
+                            valueFrom:
+                                secretKeyRef:
+                                    key: mysql-user-username
+                                    name: querydb-secret
+                        -   name: MYSQL_PASSWORD
+                            valueFrom:
+                                secretKeyRef:
+                                    key: mysql-user-password
+                                    name: querydb-secret
+                        -   name: MYSQL_ROOT_PASSWORD
+                            valueFrom:
+                                secretKeyRef:
+                                    key: mysql-user-password
+                                    name: querydb-secret
+                    ports:
+                        -   containerPort: 3306
+                            name: querydb
+                    volumeMounts:
+                        -   name: querydb-initdb
+                            mountPath: /docker-entrypoint-initdb.d
+
+            volumes:
+                -   name: querydb-initdb
+                    configMap:
+                        name: querydb-configmap
