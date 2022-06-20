@@ -1,0 +1,22 @@
+spring:
+    rabbitmq:
+        addresses: rabbitmq-clusterip-srv:5672
+        username: guest
+        password: guest
+        listener:
+            simple:
+                acknowledge-model: auto
+                retry:
+                    enabled: true
+                    initial-interval: 3s
+                    max-interval: 10s
+                    max-attempts: 5
+                    multiplier: 2
+frontend:
+    url: http://localhost:3000
+
+queue:
+    name: q.content.create
+
+exchange:
+    name: x.content
