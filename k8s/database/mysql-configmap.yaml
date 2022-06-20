@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: querydb-configmap
+data:
+    initdb.sql: |-
+        CREATE DATABASE IF NOT EXISTS `querydb`;
+    database_url: jdbc:mysql://querydb/querydb
